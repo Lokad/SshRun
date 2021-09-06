@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SshRun", "SshRun\SshRun.csproj", "{DABB61C2-BFC5-48DD-8836-C8ECD4A86A8A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SshRun.Sample", "SshRun.Sample\SshRun.Sample.csproj", "{10AA4312-3E99-49DB-84BF-F92A7B4A5AED}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{36BBF1B3-BD4E-4888-BCC3-DFF911CD2444}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DABB61C2-BFC5-48DD-8836-C8ECD4A86A8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DABB61C2-BFC5-48DD-8836-C8ECD4A86A8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DABB61C2-BFC5-48DD-8836-C8ECD4A86A8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DABB61C2-BFC5-48DD-8836-C8ECD4A86A8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10AA4312-3E99-49DB-84BF-F92A7B4A5AED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10AA4312-3E99-49DB-84BF-F92A7B4A5AED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10AA4312-3E99-49DB-84BF-F92A7B4A5AED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10AA4312-3E99-49DB-84BF-F92A7B4A5AED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {499538F9-613A-48ED-8519-5019DBB93678}
+	EndGlobalSection
+EndGlobal
