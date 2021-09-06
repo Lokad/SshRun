@@ -32,12 +32,16 @@ namespace SshRun
             catch {}
         }
 
-        /// <inheritdoc cref="IExecutionTarget.ExecuteAsync(string, IReadOnlyCollection{string}, CancellationToken)"/>
+        /// <inheritdoc cref="IExecutionTarget.ExecuteAsync(string, IReadOnlyCollection{string}, bool, CancellationToken)"/>
         public async Task<int> ExecuteAsync(
             string command, 
             IReadOnlyCollection<string> arguments, 
+            bool sudo,
             CancellationToken cancel)
         {
+            if (sudo)
+                throw new NotSupportedException("Local execution does not support 'sudo'");
+
             var psi = new ProcessStartInfo
             {
                 WorkingDirectory = RootPath,

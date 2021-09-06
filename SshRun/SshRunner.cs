@@ -27,6 +27,9 @@ namespace SshRun
         /// </summary>
         private bool _hasCopiedExecFiles = false;
 
+        /// <summary> Prefix commands with `sudo` to act as root ? </summary>
+        public bool Sudo { get; set; }
+
         public SshRunner()
         {
             _target = new LocalTempExecutionTarget();
@@ -43,7 +46,8 @@ namespace SshRun
 
         public void Dispose()
         {
-            _target.Dispose();
+            if (!_leaveOpen)
+                _target.Dispose();
         }
 
         private Task WriteCommand(Command command, CancellationToken cancel)
@@ -83,7 +87,7 @@ namespace SshRun
             return await _target.ExecuteAsync("dotnet", new[] {
                 "SshRun.dll",
                 $"{_target.RootPath}/.sshrun"
-            }, cancel);
+            }, Sudo, cancel);
         }
 
         private RemoteFile CommandFilePath() =>

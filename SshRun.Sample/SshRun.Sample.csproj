@@ -6,7 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!--
     <ProjectReference Include="..\SshRun\SshRun.csproj" />
+    -->
+    <PackageReference Include="SshRun" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
+  

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>SshRun</id>
+    <version>1.0.0</version>
+    <authors>Lokad</authors>
+    <description>A convenient library to run .NET code remotely over SSH.</description>
+    <projectUrl>https://github.com/Lokad/SshRun</projectUrl>
+    <icon>lokad.png</icon>
+    <license type="file">LICENSE.txt</license>
+    <copyright>Copyright © Lokad 2021</copyright>
+    <dependencies>
+        <dependency id="SSH.NET" version="2020.0.1"/>
+    </dependencies>
+    <contentFiles>
+      <files include="any/any/SshRun.*.json" buildAction="None" copyToOutput="true" flatten="true"/>
+    </contentFiles>
+  </metadata>
+  <files>
+    <file src="bin\Release\net5.0\SshRun.dll" target="lib\net5.0" />
+    <file src="bin\Release\net5.0\SshRun.deps.json" target="contentFiles\any\any" />
+    <file src="bin\Release\net5.0\SshRun.runtimeconfig.json" target="contentFiles\any\any" />
+    <file src="bin\Release\net5.0\LICENSE.txt" target="" />
+    <file src="bin\Release\net5.0\lokad.png" target="" />
+  </files>
+</package>
+

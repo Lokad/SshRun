@@ -107,10 +107,11 @@ namespace SshRun
             _sshClient?.Disconnect();
         }
 
-        /// <inheritdoc cref="IExecutionTarget.ExecuteAsync(string, IReadOnlyCollection{string}, CancellationToken)"/>
+        /// <inheritdoc cref="IExecutionTarget.ExecuteAsync(string, IReadOnlyCollection{string}, bool, CancellationToken)"/>
         public Task<int> ExecuteAsync(
             string command, 
             IReadOnlyCollection<string> arguments, 
+            bool sudo, 
             CancellationToken cancel)
         {
             var quote = RemotePathTransformation.ShellQuote;
@@ -119,6 +120,10 @@ namespace SshRun
             fullCommand.Append("cd ");
             fullCommand.Append(quote.Transform(RootPath));
             fullCommand.Append(" ; ");
+
+            if (sudo)
+                fullCommand.Append("sudo ");
+
             fullCommand.Append(quote.Transform(command));
             foreach (var argument in arguments)
             {
