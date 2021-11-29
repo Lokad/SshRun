@@ -112,3 +112,12 @@ It is also possible to create a `RemoteFile` from any absolute path on the remot
 ```csharp
 var rf = new RemoteFile("/home/alice/example.txt");
 ```
+
+## Improving performance
+
+The local assemblies need to be copied to the remote server, which can take a few seconds (depending on the latency and bandwidth of the connection, and the number of assembly files). When repeatedly connecting to the same remote server with the same application, there are two techniques which can be used to reduce this duration on subsequent connections: 
+
+1. Reuse the same `SshRunner` instance: it remembers that it has already uploaded the assembly files, and so after the first remote invocation, it will skip the transfer.
+2. To reuse the uploaded files across multiple executions of the program, make sure to use the same remote directory, and to set `SshExecutionTarget.DeleteOnClose` to false. On subsequent executions, the first remote invocation will detect that some files have already been uploaded, and will only upload the files that have changed (whether a file has changed is computed based on that file's SHA1 hash).
+
+This file reuse only applies to the assembly files ; calling `runner.UploadAsync` always performs a file transfer. 

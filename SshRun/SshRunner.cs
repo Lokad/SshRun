@@ -1,8 +1,10 @@
 ﻿using SshRun.Contracts;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -67,12 +69,33 @@ namespace SshRun
             var relativePaths = Directory.GetFiles(sourceDir).Select(path =>
                 Path.GetFileName(path) ?? throw new ArgumentException($"Invalid file path {path}."));
 
+            // The 'changesDetected' flag is set when a missing (or changed) file is identified, and 
+            // thus uploads start. At that point, the remote manifest file is removed, and will
+            // be restored afterwards. 
+            var changesDetected = false;
+
+            var oldManifest = await RetrieveManifestFileAsync(cancel);
+            var newManifest = new Manifest();
+
             foreach (var relPath in relativePaths)
             {
                 var remotePath = new RemoteFile($"{_target.RootPath}/{relPath}");
                 var file = new FileInfo(Path.Combine(sourceDir, relPath));
+
+                var newHash = newManifest.AddHashFor(remotePath.Path, file);
+                if (oldManifest.ExistsWithHash(remotePath.Path, newHash)) continue;
+
+                if (!changesDetected)
+                {
+                    await RemoveManifestFileAsync(cancel);
+                    changesDetected = true;
+                }
+
                 await _target.WriteFileAsync(file, remotePath, cancel);
             }
+
+            if (changesDetected)
+                await WriteManifestFileAsync(newManifest, cancel);
 
             _hasCopiedExecFiles = true;
         }
@@ -95,6 +118,57 @@ namespace SshRun
 
         private RemoteFile ResultFilePath() =>
             new($"{_target.RootPath}/.sshrun/result");
+
+        /// <summary>
+        ///     The path of the manifest file in the remote directory. The file
+        ///     contains an instance of <see cref="Manifest"/> representing the hashes
+        ///     of the files currently present on the remote, which can be used to 
+        ///     avoid re-uploading files that are already present there.
+        /// </summary>
+        private RemoteFile ManifestFilePath() =>
+            new($"{_target.RootPath}/.sshrun/manifest");
+
+        /// <summary> Download the manifest file present on the remote. </summary>
+        /// <remarks> 
+        ///     If there is no manifest file on the remote, then returns the
+        ///     empty one. 
+        /// </remarks>
+        /// <see cref="ManifestFilePath"/>
+        private async Task<Manifest> RetrieveManifestFileAsync(CancellationToken cancel)
+        {
+            var ms = new MemoryStream();
+            try
+            {
+                await _target.ReadFileAsync(ManifestFilePath(), ms, cancel);
+                var str = Encoding.UTF8.GetString(ms.ToArray());
+
+                if (Manifest.TryDeserializeFromString(str, out var result))
+                    return result;
+            }
+            catch { }
+
+            return new Manifest();
+        }
+
+        /// <summary> Deletes the remote manifest file. </summary>
+        /// <see cref="ManifestFilePath"/>
+        private Task RemoveManifestFileAsync(CancellationToken cancel) =>
+            _target.RemoveFileAsync(ManifestFilePath(), cancel);
+
+        /// <summary> Overwrites or creates the remote manifest file. </summary>
+        /// <see cref="ManifestFilePath"/>
+        private async Task WriteManifestFileAsync(Manifest manifest, CancellationToken cancel)
+        {
+            try
+            {
+                var str = manifest.SerializeToString();
+                await _target.WriteFileAsync(
+                    Encoding.UTF8.GetBytes(str), 
+                    ManifestFilePath(), 
+                    cancel);
+            }
+            catch { }
+        }
 
         public Task<int> RunAsync(Expression<Action> action, CancellationToken cancel) =>
             DoRunAsync(action, cancel);

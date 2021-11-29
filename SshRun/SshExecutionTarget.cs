@@ -14,6 +14,13 @@ namespace SshRun
         public string RootPath { get; }
 
         /// <summary>
+        ///     If true, the <see cref="RootPath"/> directory will be deleted when this
+        ///     instance is closed. If false, it will be left behind (and can thus be 
+        ///     reused on subsequent calls).
+        /// </summary>
+        public bool DeleteOnClose { get; set; } = true;
+
+        /// <summary>
         ///     All sub-directories of the <see cref="RootPath"/> that have been created
         ///     in order to upload files. 
         /// </summary>
@@ -97,11 +104,14 @@ namespace SshRun
 
         public void Dispose()
         {
-            try
+            if (DeleteOnClose)
             {
-                SshClient.RunCommand("rm -rf " + RemotePathTransformation.ShellQuote.Transform(RootPath));
+                try
+                {
+                    SshClient.RunCommand("rm -rf " + RemotePathTransformation.ShellQuote.Transform(RootPath));
+                }
+                catch { }
             }
-            catch { }
 
             _scpClient?.Disconnect();
             _sshClient?.Disconnect();
@@ -222,6 +232,13 @@ namespace SshRun
         public Task ReadFileAsync(RemoteFile file, Stream local, CancellationToken cancel)
         {
             ScpClient.Download(file.Path, local);
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc cref="IExecutionTarget.RemoveFileAsync(RemoteFile, CancellationToken)"/>
+        public Task RemoveFileAsync(RemoteFile file, CancellationToken cancel)
+        {
+            SshClient.RunCommand("rm " + RemotePathTransformation.ShellQuote.Transform(file.Path));
             return Task.CompletedTask;
         }
     }

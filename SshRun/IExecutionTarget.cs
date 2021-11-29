@@ -53,5 +53,8 @@ namespace SshRun
             IReadOnlyCollection<string> arguments,
             bool sudo,
             CancellationToken cancel);
+
+        /// <summary> Remove a remote file if it exists. </summary>
+        Task RemoveFileAsync(RemoteFile remoteFile, CancellationToken cancel);
     }
 }

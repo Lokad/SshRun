@@ -93,5 +93,12 @@ namespace SshRun
             using var stream = file.Open();
             await stream.CopyToAsync(local, cancel);
         }
+
+        /// <inheritdoc cref="IExecutionTarget.RemoveFileAsync(RemoteFile, CancellationToken)"/>
+        public Task RemoveFileAsync(RemoteFile file, CancellationToken cancel)
+        {
+            File.Delete(file.Path);
+            return Task.CompletedTask;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Renci.SshNet;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +21,10 @@ namespace SshRun.Sample
                     new PrivateKeyFile(@"C:\Users\VictorNicollet\.ssh\id_rsa")
                 ));
 
-            var sshTarget = new SshExecutionTarget(connection, "/home/azureuser/test");
+            var sshTarget = new SshExecutionTarget(connection, "/home/azureuser/test")
+            {
+                DeleteOnClose = false
+            };
 
             using (var runner = new SshRunner(sshTarget))
             {
@@ -42,6 +46,7 @@ deserunt mollit anim id est laborum.");
 
                 foreach (var message in messages)
                 {
+                    var sw = Stopwatch.StartNew();
                     var result = await runner.RunAsync(() => ToUpper(message), default);
                     if (result.Text != null) 
                         Console.WriteLine("Text: {0}", result.Text);
@@ -51,6 +56,8 @@ deserunt mollit anim id est laborum.");
                         var rbytes = await runner.DownloadAsync(result.File, default);
                         Console.WriteLine("File: {0}", Encoding.UTF8.GetString(rbytes));
                     }
+
+                    Console.WriteLine("In {0}", sw.Elapsed);
                 }
             }
         }
