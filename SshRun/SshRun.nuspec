@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>SshRun</id>
-    <version>2.0.0</version>
+    <version>3.0.0</version>
     <authors>Lokad</authors>
     <description>A convenient library to run .NET code remotely over SSH.</description>
     <projectUrl>https://github.com/Lokad/SshRun</projectUrl>
