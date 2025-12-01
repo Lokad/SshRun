@@ -51,6 +51,8 @@ namespace SshRun
         Task<int> ExecuteAsync(
             string command,
             IReadOnlyCollection<string> arguments,
+            Action<string>? onStdOut,
+            Action<string>? onStdErr,
             bool sudo,
             CancellationToken cancel);
 

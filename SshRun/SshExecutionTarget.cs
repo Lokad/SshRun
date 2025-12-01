@@ -10,6 +10,8 @@ namespace SshRun
 {
     public sealed class SshExecutionTarget : IExecutionTarget
     {
+        public static readonly TimeSpan OutputFlushDelay = TimeSpan.FromSeconds(5);
+
         /// <inheritdoc cref="IExecutionTarget.RootPath"/>
         public string RootPath { get; }
 
@@ -121,6 +123,8 @@ namespace SshRun
         public Task<int> ExecuteAsync(
             string command, 
             IReadOnlyCollection<string> arguments, 
+            Action<string>? onStdout,
+            Action<string>? onStdErr,
             bool sudo, 
             CancellationToken cancel)
         {
@@ -151,6 +155,42 @@ namespace SshRun
                 tcs.TrySetCanceled(cancel);
             });
 
+            if (onStdout != null)
+            {
+                Task.Run(async () =>
+                {
+                    using var localCancel = new CancellationTokenSource();
+                    using var _ = cancel.Register(() =>
+                        localCancel.CancelAfter(OutputFlushDelay));
+                    var reader = new StreamReader(sshCommand.OutputStream);
+
+                    var line = await reader.ReadLineAsync(localCancel.Token);
+                    while (line != null)
+                    {
+                        onStdout(line);
+                        line = await reader.ReadLineAsync(localCancel.Token);
+                    }
+                });
+            }
+
+            if (onStdErr != null)
+            {
+                Task.Run(async () =>
+                {
+                    using var localCancel = new CancellationTokenSource();
+                    using var _ = cancel.Register(() =>
+                        localCancel.CancelAfter(OutputFlushDelay));
+                    var reader = new StreamReader(sshCommand.ExtendedOutputStream);
+
+                    var line = await reader.ReadLineAsync(localCancel.Token);
+                    while (line != null)
+                    {
+                        onStdErr(line);
+                        line = await reader.ReadLineAsync(localCancel.Token);
+                    }
+                });
+            }
+
             tcs.Task.ContinueWith(_ => registration.Dispose(), cancel);
 
             sshCommand.BeginExecute(asyncResult =>
@@ -158,7 +198,7 @@ namespace SshRun
                 try
                 {
                     sshCommand.EndExecute(asyncResult);
-                    tcs.TrySetResult(sshCommand.ExitStatus);
+                    tcs.TrySetResult(sshCommand.ExitStatus ?? -1);
                 }
                 catch (Exception e)
                 {
