@@ -1,6 +1,5 @@
 ﻿using SshRun.Contracts;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -100,17 +99,27 @@ namespace SshRun
             _hasCopiedExecFiles = true;
         }
 
-        private async Task<int> DoRunAsync<T>(Expression<T> expr, CancellationToken cancel)
+        private async Task<int> DoRunAsync<T>(
+            Expression<T> expr,
+            Action<string>? onStdout,
+            Action<string>? onStdErr,
+            CancellationToken cancel)
         {
             var command = _extractor.FromLinqExpression(expr);
 
             await WriteCommand(command, cancel);
             await WriteExecFiles(cancel);
 
-            return await _target.ExecuteAsync("dotnet", new[] {
-                "SshRun.dll",
-                $"{_target.RootPath}/.sshrun"
-            }, Sudo, cancel);
+            return await _target.ExecuteAsync(
+                "dotnet",
+                [
+                    "SshRun.dll",
+                    $"{_target.RootPath}/.sshrun"
+                ],
+                onStdout,
+                onStdErr,
+                Sudo,
+                cancel);
         }
 
         private RemoteFile CommandFilePath() =>
@@ -171,11 +180,25 @@ namespace SshRun
         }
 
         public Task<int> RunAsync(Expression<Action> action, CancellationToken cancel) =>
-            DoRunAsync(action, cancel);
+            DoRunAsync(action, null, null, cancel);
 
-        public async Task<T> RunAsync<T>(Expression<Func<T>> action, CancellationToken cancel)
+        public Task<int> RunAsync(
+            Expression<Action> action,
+            Action<string>? onStdout,
+            Action<string>? onStderr,
+            CancellationToken cancel) =>
+            DoRunAsync(action, onStdout, onStderr, cancel);
+
+        public Task<T> RunAsync<T>(Expression<Func<T>> action, CancellationToken cancel) =>
+            RunAsync(action, null, null, cancel);
+
+        public async Task<T> RunAsync<T>(
+            Expression<Func<T>> action,
+            Action<string>? onStdout,
+            Action<string>? onStderr,
+            CancellationToken cancel)
         {
-            var status = await DoRunAsync(action, cancel);
+            var status = await DoRunAsync(action, onStdout, onStderr, cancel);
 
             if (status != 0)
                 throw new SshRunnerException($"Process finished with status {status}");
@@ -187,9 +210,16 @@ namespace SshRun
                 throw new NullReferenceException("Null return value received");
         }
 
-        public async Task<T> RunAsync<T>(Expression<Func<Task<T>>> action, CancellationToken cancel)
+        public Task<T> RunAsync<T>(Expression<Func<Task<T>>> action, CancellationToken cancel) =>
+            RunAsync(action, null, null, cancel);
+
+        public async Task<T> RunAsync<T>(
+            Expression<Func<Task<T>>> action, 
+            Action<string>? onStdout,
+            Action<string>? onStderr,
+            CancellationToken cancel)
         {
-            var status = await DoRunAsync(action, cancel);
+            var status = await DoRunAsync(action, onStdout, onStderr, cancel);
 
             if (status != 0)
                 throw new SshRunnerException($"Process finished with status {status}");
