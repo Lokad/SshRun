@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>SshRun</id>
-    <version>3.1.0</version>
+    <version>3.2.0</version>
     <authors>Lokad</authors>
     <description>A convenient library to run .NET code remotely over SSH.</description>
     <projectUrl>https://github.com/Lokad/SshRun</projectUrl>
@@ -17,11 +17,11 @@
     </contentFiles>
   </metadata>
   <files>
-    <file src="bin\Release\net8.0\SshRun.dll" target="lib\net8.0" />
-    <file src="bin\Release\net8.0\SshRun.deps.json" target="contentFiles\any\any" />
-    <file src="bin\Release\net8.0\SshRun.runtimeconfig.json" target="contentFiles\any\any" />
-    <file src="bin\Release\net8.0\LICENSE.txt" target="" />
-    <file src="bin\Release\net8.0\lokad.png" target="" />
+    <file src="bin\Release\net10.0\SshRun.dll" target="lib\net10.0" />
+    <file src="bin\Release\net10.0\SshRun.deps.json" target="contentFiles\any\any" />
+    <file src="bin\Release\net10.0\SshRun.runtimeconfig.json" target="contentFiles\any\any" />
+    <file src="bin\Release\net10.0\LICENSE.txt" target="" />
+    <file src="bin\Release\net10.0\lokad.png" target="" />
   </files>
 </package>
 
